@@ -1,28 +1,42 @@
+
 import React from 'react';
 import * as LucideIcons from 'lucide-react';
-import { LucideProps } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-interface IconProps extends LucideProps {
+export interface IconProps extends React.HTMLAttributes<HTMLSpanElement> {
   name: string;
+  color?: string;
+  size?: number;
+  strokeWidth?: number;
   fallback?: string;
 }
 
-const Icon: React.FC<IconProps> = ({ name, fallback = 'CircleAlert', ...props }) => {
-  const IconComponent = (LucideIcons as Record<string, React.FC<LucideProps>>)[name];
+export function Icon({
+  name,
+  color,
+  size = 24,
+  strokeWidth = 2,
+  fallback = "CircleAlert",
+  className,
+  ...props
+}: IconProps) {
+  // Try to get the icon from lucide
+  const LucideIcon = (LucideIcons as any)[name] || (LucideIcons as any)[fallback];
 
-  if (!IconComponent) {
-    // Если иконка не найдена, используем fallback иконку
-    const FallbackIcon = (LucideIcons as Record<string, React.FC<LucideProps>>)[fallback];
-
-    // Если даже fallback не найден, возвращаем пустой span
-    if (!FallbackIcon) {
-      return <span className="text-xs text-gray-400">[icon]</span>;
-    }
-
-    return <FallbackIcon {...props} />;
+  if (!LucideIcon) {
+    console.warn(`Icon "${name}" not found, and fallback "${fallback}" also not found.`);
+    return <span className={cn("inline-block", className)} {...props}>⚠️</span>;
   }
 
-  return <IconComponent {...props} />;
-};
+  return (
+    <span className={cn("inline-block", className)} {...props}>
+      <LucideIcon
+        color={color}
+        size={size}
+        strokeWidth={strokeWidth}
+      />
+    </span>
+  );
+}
 
 export default Icon;
